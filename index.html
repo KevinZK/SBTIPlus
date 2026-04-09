@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SBTI+ 人格测试</title>
+  <meta name="description" content="SBTI+ 人格测试 —— 31 题 · 15 维度 · 16 种人格，娱乐向。" />
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <main id="app">
+
+    <!-- 1. 首页 -->
+    <section id="screen-intro" class="screen active">
+      <div class="card hero">
+        <h1 class="title">SBTI<span class="plus">+</span></h1>
+        <p class="subtitle">MBTI 已经过时，SBTI+ 来了。</p>
+        <p class="desc">31 道题 · 15 个维度 · 16 种人格。<br/>测完你会看到一个你可能并不想承认的自己。</p>
+        <button class="btn btn-primary" id="startBtn">开始测试</button>
+        <p class="foot">纯娱乐 · 本测试不做任何诊断 · 开源可 fork</p>
+      </div>
+    </section>
+
+    <!-- 2. 答题 -->
+    <section id="screen-quiz" class="screen">
+      <div class="card">
+        <header class="quiz-head">
+          <span id="progressText">0 / 0</span>
+          <div class="progress-bar"><div id="progressFill"></div></div>
+        </header>
+        <ol id="questionList" class="question-list"></ol>
+        <footer class="quiz-foot">
+          <button class="btn btn-secondary" id="backBtn">返回首页</button>
+          <button class="btn btn-primary" id="submitBtn">提交并查看结果</button>
+        </footer>
+        <p class="hint" id="hint">把题全做完才放行。</p>
+      </div>
+    </section>
+
+    <!-- 3. 结果 -->
+    <section id="screen-result" class="screen">
+      <div class="card result">
+        <p class="kicker">你的主人格</p>
+        <h2 id="resName" class="res-name"></h2>
+        <p id="resCode" class="res-code"></p>
+        <div id="resRarity" class="rarity-badge"></div>
+        <p id="resMatch" class="res-match"></p>
+        <blockquote id="resTagline" class="tagline"></blockquote>
+        <p id="resDesc" class="res-desc"></p>
+
+        <h3>十五维度评分</h3>
+        <ul id="dimList" class="dim-list"></ul>
+
+        <h3>其他匹配度 Top 3</h3>
+        <ul id="altList" class="alt-list"></ul>
+
+        <div class="friendly">
+          <h4>友情提示</h4>
+          <p>本测试纯属娱乐，别拿它当诊断、面试、相亲、分手或人生判决书。你可以笑，但别太当真。</p>
+        </div>
+
+        <footer class="result-foot">
+          <button class="btn btn-secondary" id="restartBtn">重新测试</button>
+          <button class="btn btn-primary" id="homeBtn">回到首页</button>
+        </footer>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="./data.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>

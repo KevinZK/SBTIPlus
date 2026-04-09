@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:sbti.unun.dev)",
+      "Bash(curl -sL -A \"Mozilla/5.0\" https://sbti.unun.dev/ -o /tmp/sbti.html -w \"HTTP:%{http_code}\\\\n\")",
+      "Read(//tmp/**)",
+      "Bash(node:*)"
+    ]
+  }
+}
