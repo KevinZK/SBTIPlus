@@ -39,6 +39,38 @@ html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text);
 .desc { color: var(--text); margin-bottom: 32px; }
 .foot { color: var(--muted); font-size: 13px; margin-top: 24px; }
 
+.rarity-tease {
+  list-style: none;
+  padding: 0;
+  margin: 22px auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  max-width: 460px;
+}
+.rarity-tease li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  border: 1px solid currentColor;
+  background: rgba(255,255,255,0.03);
+}
+.rarity-tease .stars { font-size: 11px; }
+.tease {
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.75;
+  margin: 20px auto 28px;
+  max-width: 480px;
+}
+.tease strong { color: var(--primary); }
+
 /* Buttons */
 .btn {
   display: inline-block;
