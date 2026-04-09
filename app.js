@@ -15,14 +15,45 @@
   // DIMS 按 code 映射，方便查
   const DIM_BY_CODE = Object.fromEntries(DIMS.map((d) => [d.code, d]));
 
-  // 稀有度元数据
+  // 稀有度元数据（color 同时供 SVG 头像使用）
   const RARITY = {
-    common:   { label: '常见',   stars: '★',     short: 'COMMON'    },
-    uncommon: { label: '普通',   stars: '★★',    short: 'UNCOMMON'  },
-    rare:     { label: '稀有',   stars: '★★★',   short: 'RARE'      },
-    epic:     { label: '史诗',   stars: '★★★★',  short: 'EPIC'      },
-    legend:   { label: '传说',   stars: '★★★★★', short: 'LEGENDARY' },
+    common:   { label: '常见',   stars: '★',     short: 'COMMON',    color: '#9aa0ac' },
+    uncommon: { label: '普通',   stars: '★★',    short: 'UNCOMMON',  color: '#7ed0a0' },
+    rare:     { label: '稀有',   stars: '★★★',   short: 'RARE',      color: '#7ad0ff' },
+    epic:     { label: '史诗',   stars: '★★★★',  short: 'EPIC',      color: '#c58cff' },
+    legend:   { label: '传说',   stars: '★★★★★', short: 'LEGENDARY', color: '#ffd34d' },
   };
+
+  // 根据人格 key + 稀有度生成一张 SVG 头像
+  function makeAvatar(typeKey, rarityKey, size = 180) {
+    const rar = RARITY[rarityKey] || RARITY.common;
+    const emoji = (window.SBTI_AVATARS && window.SBTI_AVATARS[typeKey]) || '❓';
+    const c = rar.color;
+    const id = 'g-' + typeKey + '-' + size;
+    const fontSize = Math.round(size * 0.52);
+    const cy = Math.round(size / 2);
+    return `
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">
+        <defs>
+          <radialGradient id="${id}" cx="50%" cy="42%" r="58%">
+            <stop offset="0%"  stop-color="${c}" stop-opacity="0.55"/>
+            <stop offset="70%" stop-color="${c}" stop-opacity="0.12"/>
+            <stop offset="100%" stop-color="${c}" stop-opacity="0"/>
+          </radialGradient>
+          <radialGradient id="${id}-ring" cx="50%" cy="50%" r="50%">
+            <stop offset="92%" stop-color="${c}" stop-opacity="0"/>
+            <stop offset="100%" stop-color="${c}" stop-opacity="0.9"/>
+          </radialGradient>
+        </defs>
+        <circle cx="${size/2}" cy="${size/2}" r="${size/2 - 2}" fill="#1e222b"/>
+        <circle cx="${size/2}" cy="${size/2}" r="${size/2 - 2}" fill="url(#${id})"/>
+        <circle cx="${size/2}" cy="${size/2}" r="${size/2 - 2}" fill="none"
+                stroke="${c}" stroke-width="2" stroke-opacity="0.7"/>
+        <text x="${size/2}" y="${cy}" font-size="${fontSize}"
+              text-anchor="middle" dominant-baseline="central"
+              style="font-family:-apple-system,'Segoe UI Emoji','Noto Color Emoji',sans-serif">${emoji}</text>
+      </svg>`;
+  }
 
   // state
   let answers = new Array(QUESTIONS.length).fill(null);
@@ -123,6 +154,9 @@
     const ranked = matchTypes(dims);
     const top = ranked[0];
 
+    // 人格头像
+    $('resAvatar').innerHTML = makeAvatar(top.type.k, top.type.rarity, 180);
+
     $('resName').textContent = top.type.name;
     $('resCode').textContent = top.type.sub;
     $('resMatch').textContent = `匹配度 ${top.match}%`;
@@ -133,7 +167,31 @@
     badge.className = 'rarity-badge rarity-' + top.type.rarity;
     badge.innerHTML = `<span class="stars">${r.stars}</span><span class="rarity-label">${r.short} · ${r.label}</span>`;
     $('resTagline').textContent = `"${top.type.tagline}"`;
-    $('resDesc').textContent = top.type.desc;
+    // 把描述里的【...】高亮成稀有度徽章段，并按段落拆分渲染
+    const descEl = $('resDesc');
+    descEl.innerHTML = '';
+    const paragraphs = top.type.desc.split(/(?=【)|\n+/).filter(Boolean);
+    paragraphs.forEach((para) => {
+      const p = document.createElement('p');
+      // 【xxx】段作为高亮前缀
+      const m = para.match(/^【([^】]+)】(.*)$/);
+      if (m) {
+        const tag = document.createElement('span');
+        tag.className = 'desc-tag rarity-' + top.type.rarity;
+        tag.textContent = m[1];
+        p.appendChild(tag);
+        p.appendChild(document.createTextNode(' ' + m[2]));
+      } else {
+        p.textContent = para;
+      }
+      descEl.appendChild(p);
+    });
+    if (top.type.tone) {
+      const toneEl = document.createElement('p');
+      toneEl.className = 'desc-tone';
+      toneEl.textContent = `—— 人格基调：${top.type.tone}`;
+      descEl.appendChild(toneEl);
+    }
 
     // 维度卡片 —— 像原作那种
     $('dimList').innerHTML = DIMS.map((d) => {
@@ -161,6 +219,7 @@
       const rar = RARITY[a.type.rarity] || RARITY.common;
       return `
       <li>
+        <span class="alt-avatar">${makeAvatar(a.type.k, a.type.rarity, 48)}</span>
         <span class="alt-name">
           ${escapeHtml(a.type.name)}
           <span class="alt-sub">${a.type.k}</span>

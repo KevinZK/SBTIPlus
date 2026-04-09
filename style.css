@@ -85,12 +85,52 @@ html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text);
 .hint { color: var(--muted); font-size: 13px; margin-top: 12px; }
 
 /* Result */
-.result .kicker { color: var(--muted); margin: 0; text-transform: uppercase; letter-spacing: 2px; font-size: 13px; }
+.result .kicker { color: var(--muted); margin: 0; text-transform: uppercase; letter-spacing: 2px; font-size: 13px; text-align: center; }
+.res-avatar { display: flex; justify-content: center; margin: 16px 0 4px; }
+.res-avatar svg { filter: drop-shadow(0 6px 20px rgba(0,0,0,0.35)); }
+.result .res-name,
+.result .res-code,
+.result .res-match,
+.result .rarity-badge { text-align: center; }
+.result > .card > .res-name { text-align: center; }
+.result .rarity-badge { display: inline-flex; }
+#screen-result .card { text-align: center; }
+#screen-result .card .tagline,
+#screen-result .card .res-desc,
+#screen-result .card .dim-list,
+#screen-result .card .alt-list,
+#screen-result .card .friendly { text-align: left; }
+#screen-result .card h3 { text-align: left; }
+
+.alt-list li { align-items: center; gap: 12px; }
+.alt-avatar { flex-shrink: 0; display: inline-flex; }
+.alt-avatar svg { display: block; }
+.alt-list .alt-name { flex: 1; }
 .res-name { font-size: 42px; margin: 8px 0 4px; }
 .res-code { color: var(--accent); margin: 0 0 8px; font-weight: 600; letter-spacing: 1px; font-size: 14px; }
 .res-match { color: var(--primary); margin: 0 0 16px; font-weight: 600; }
 .tagline { border-left: 3px solid var(--primary); padding: 4px 14px; margin: 16px 0; color: var(--text); font-style: italic; }
 .res-desc { margin: 16px 0 32px; }
+.res-desc p { margin: 0 0 14px; line-height: 1.8; }
+.res-desc p:last-child { margin-bottom: 0; }
+.desc-tag {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  border: 1px solid currentColor;
+  margin-right: 6px;
+  letter-spacing: 0.5px;
+  vertical-align: 1px;
+}
+.desc-tone {
+  color: var(--muted);
+  font-size: 13px;
+  font-style: italic;
+  text-align: right;
+  margin-top: 18px !important;
+}
 
 .result h3 { font-size: 16px; color: var(--muted); border-top: 1px solid var(--border); padding-top: 20px; margin-top: 24px; }
 
