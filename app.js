@@ -57,58 +57,94 @@
 
   // state
   let answers = new Array(QUESTIONS.length).fill(null);
+  let currentQ = 0;
 
   // ---------- Quiz ----------
-  function renderQuiz() {
-    const list = $('questionList');
-    list.innerHTML = '';
-    QUESTIONS.forEach((q, i) => {
-      const li = document.createElement('li');
-      li.innerHTML = `
-        <p class="q-text"><span class="q-idx">${i + 1}.</span>${escapeHtml(q.text)}</p>
-        <div class="opts" data-q="${i}">
-          ${q.opts.map((o, j) =>
-            `<label class="opt" data-opt="${j}">
-               <input type="radio" name="q${i}" value="${j}">
-               ${escapeHtml(o.label)}
-             </label>`
-          ).join('')}
-        </div>
-      `;
-      list.appendChild(li);
-    });
-    list.addEventListener('change', onAnswer);
-    updateProgress();
-  }
-
   function escapeHtml(s) {
     return String(s).replace(/[&<>"']/g, (c) => ({
       '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
     }[c]));
   }
 
-  function onAnswer(e) {
-    const input = e.target;
-    if (input.tagName !== 'INPUT') return;
-    const qIdx = Number(input.name.slice(1));
-    const optIdx = Number(input.value);
-    answers[qIdx] = optIdx;
-    const group = input.closest('.opts');
-    group.querySelectorAll('.opt').forEach((el, j) => {
+  // 渲染当前这一题
+  function renderCurrentQuestion(direction) {
+    const total = QUESTIONS.length;
+    const q = QUESTIONS[currentQ];
+    const card = $('questionCard');
+
+    // 切换动画：根据方向给一个入场 class
+    card.classList.remove('slide-in-left', 'slide-in-right');
+    void card.offsetWidth; // 强制重排让动画生效
+    card.classList.add(direction === 'back' ? 'slide-in-left' : 'slide-in-right');
+
+    $('qIdx').textContent = (currentQ + 1) + '.';
+    $('qText').textContent = q.text;
+
+    const optsEl = $('qOpts');
+    optsEl.innerHTML = q.opts.map((o, j) => `
+      <button type="button" class="opt ${answers[currentQ] === j ? 'checked' : ''}"
+              data-opt="${j}">
+        <span class="opt-letter">${String.fromCharCode(65 + j)}</span>
+        <span class="opt-label">${escapeHtml(o.label)}</span>
+      </button>
+    `).join('');
+
+    // 点击任意选项 → 记录答案 + 自动跳转
+    optsEl.querySelectorAll('.opt').forEach((btn) => {
+      btn.addEventListener('click', () => onPickOption(Number(btn.dataset.opt)));
+    });
+
+    // 上一题按钮可用性
+    $('prevBtn').disabled = currentQ === 0;
+    // 最后一题：如果已答，显示"查看结果"按钮
+    const isLast = currentQ === total - 1;
+    $('submitBtn').style.display = (isLast && answers[currentQ] != null) ? '' : 'none';
+
+    updateProgress();
+  }
+
+  function onPickOption(optIdx) {
+    answers[currentQ] = optIdx;
+    // 视觉反馈：高亮选中
+    $('qOpts').querySelectorAll('.opt').forEach((el, j) => {
       el.classList.toggle('checked', j === optIdx);
     });
     updateProgress();
+
+    const total = QUESTIONS.length;
+    if (currentQ < total - 1) {
+      // 自动跳到下一题（短暂延迟让用户看清自己选了什么）
+      setTimeout(() => {
+        currentQ += 1;
+        renderCurrentQuestion('forward');
+      }, 260);
+    } else {
+      // 最后一题：显示提交按钮
+      $('submitBtn').style.display = '';
+      $('hint').textContent = '已经是最后一题，可以查看你的人格了 →';
+    }
+  }
+
+  function goPrev() {
+    if (currentQ === 0) return;
+    currentQ -= 1;
+    renderCurrentQuestion('back');
   }
 
   function updateProgress() {
     const done = answers.filter((a) => a !== null).length;
     const total = QUESTIONS.length;
-    $('progressText').textContent = `${done} / ${total}`;
+    const cur = currentQ + 1;
+    $('progressText').textContent = `${cur} / ${total}`;
+    // 进度条按"已答题数"显示
     $('progressFill').style.width = (done / total * 100) + '%';
-    $('submitBtn').disabled = done < total;
-    $('hint').textContent = done < total
-      ? `还有 ${total - done} 题没答，答完才放行。`
-      : '全部答完，随时提交。';
+    if (done < total) {
+      $('hint').textContent = answers[currentQ] != null
+        ? '✓ 已选，自动进入下一题…'
+        : '点选项即可，选完自动跳下一题';
+    } else {
+      $('hint').textContent = '全部答完，随时查看结果 →';
+    }
   }
 
   // ---------- Scoring ----------
@@ -233,20 +269,48 @@
   // ---------- Wiring ----------
   function resetAnswers() {
     answers = new Array(QUESTIONS.length).fill(null);
-    document.querySelectorAll('.opt.checked').forEach((el) => el.classList.remove('checked'));
-    document.querySelectorAll('input[type=radio]').forEach((el) => { el.checked = false; });
-    updateProgress();
+    currentQ = 0;
+    renderCurrentQuestion('forward');
   }
 
-  $('startBtn').addEventListener('click', () => show('quiz'));
+  // 结果页切换进来时触发 AdSense 填充（SPA 模式必须手动 push）
+  function loadAds() {
+    try {
+      document.querySelectorAll('.ad-slot ins.adsbygoogle').forEach((el) => {
+        if (el.getAttribute('data-adsbygoogle-status')) return;
+        (window.adsbygoogle = window.adsbygoogle || []).push({});
+      });
+    } catch (e) { /* ignore */ }
+  }
+
+  $('startBtn').addEventListener('click', () => {
+    resetAnswers();
+    show('quiz');
+  });
   $('backBtn').addEventListener('click', () => show('intro'));
+  $('prevBtn').addEventListener('click', goPrev);
   $('submitBtn').addEventListener('click', () => {
     if (answers.some((a) => a === null)) return;
     renderResult();
     show('result');
+    loadAds();
   });
   $('restartBtn').addEventListener('click', () => { resetAnswers(); show('quiz'); });
   $('homeBtn').addEventListener('click', () => { resetAnswers(); show('intro'); });
 
-  renderQuiz();
+  // 键盘快捷键：1/2/3 或 A/B/C 选项，← 返回上一题
+  document.addEventListener('keydown', (e) => {
+    if (!screens.quiz.classList.contains('active')) return;
+    const key = e.key.toLowerCase();
+    if (['1','2','3'].includes(key)) {
+      onPickOption(Number(key) - 1);
+    } else if (['a','b','c'].includes(key)) {
+      onPickOption(key.charCodeAt(0) - 97);
+    } else if (e.key === 'ArrowLeft') {
+      goPrev();
+    }
+  });
+
+  // 初始渲染第一题
+  renderCurrentQuestion('forward');
 })();

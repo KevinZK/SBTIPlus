@@ -4,8 +4,13 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SBTI+ 人格测试</title>
-  <meta name="description" content="SBTI+ 人格测试 —— 31 题 · 15 维度 · 16 种人格，娱乐向。" />
-  <link rel="stylesheet" href="./style.css" />
+  <meta name="description" content="SBTI+ 人格测试 —— 31 题 · 15 维度 · 22 种人格，五级稀有度，娱乐向。" />
+  <link rel="stylesheet" href="./style.css?v=3" />
+
+  <!-- Google AdSense -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3157688021282766"
+          crossorigin="anonymous"></script>
+  <meta name="google-adsense-account" content="ca-pub-3157688021282766" />
 </head>
 <body>
   <main id="app">
@@ -33,19 +38,25 @@
       </div>
     </section>
 
-    <!-- 2. 答题 -->
+    <!-- 2. 答题 —— 卡片式逐题切换 -->
     <section id="screen-quiz" class="screen">
-      <div class="card">
+      <div class="card quiz-card">
         <header class="quiz-head">
-          <span id="progressText">0 / 0</span>
+          <span id="progressText">1 / 31</span>
           <div class="progress-bar"><div id="progressFill"></div></div>
         </header>
-        <ol id="questionList" class="question-list"></ol>
+
+        <div id="questionCard" class="question-card">
+          <p class="q-text"><span class="q-idx" id="qIdx">1.</span><span id="qText"></span></p>
+          <div class="opts" id="qOpts"></div>
+        </div>
+
         <footer class="quiz-foot">
+          <button class="btn btn-secondary" id="prevBtn">← 上一题</button>
           <button class="btn btn-secondary" id="backBtn">返回首页</button>
-          <button class="btn btn-primary" id="submitBtn">提交并查看结果</button>
+          <button class="btn btn-primary" id="submitBtn" style="display:none">提交并查看结果</button>
         </footer>
-        <p class="hint" id="hint">把题全做完才放行。</p>
+        <p class="hint" id="hint">选完会自动跳到下一题</p>
       </div>
     </section>
 
@@ -61,11 +72,35 @@
         <blockquote id="resTagline" class="tagline"></blockquote>
         <p id="resDesc" class="res-desc"></p>
 
+        <!-- Ad slot: 描述之后 / 维度之前 · 黄金位置（审核通过后取消注释） -->
+        <!--
+        <div class="ad-slot">
+          <ins class="adsbygoogle"
+               style="display:block"
+               data-ad-client="ca-pub-3157688021282766"
+               data-ad-slot="AUTO"
+               data-ad-format="auto"
+               data-full-width-responsive="true"></ins>
+        </div>
+        -->
+
         <h3>十五维度评分</h3>
         <ul id="dimList" class="dim-list"></ul>
 
         <h3>其他匹配度 Top 3</h3>
         <ul id="altList" class="alt-list"></ul>
+
+        <!-- Ad slot: 备选人格之后 · 友情提示之前（审核通过后取消注释） -->
+        <!--
+        <div class="ad-slot">
+          <ins class="adsbygoogle"
+               style="display:block"
+               data-ad-client="ca-pub-3157688021282766"
+               data-ad-slot="AUTO"
+               data-ad-format="auto"
+               data-full-width-responsive="true"></ins>
+        </div>
+        -->
 
         <div class="friendly">
           <h4>友情提示</h4>
@@ -81,9 +116,22 @@
 
   </main>
 
-  <script src="./data.js"></script>
-  <script src="./avatars.js"></script>
-  <script src="./app.js"></script>
+  <footer class="site-footer">
+    <nav>
+      <a href="./about.html">关于</a>
+      <span>·</span>
+      <a href="./privacy.html">隐私政策</a>
+      <span>·</span>
+      <a href="./terms.html">服务条款</a>
+      <span>·</span>
+      <a href="./contact.html">联系我们</a>
+    </nav>
+    <p>© 2026 SBTI+ · 纯娱乐 · 本测试不做任何诊断</p>
+  </footer>
+
+  <script src="./data.js?v=3"></script>
+  <script src="./avatars.js?v=3"></script>
+  <script src="./app.js?v=3"></script>
 
   <!-- Cloudflare Web Analytics —— 把下面的 YOUR_TOKEN_HERE 替换成你在 CF 后台拿到的 token -->
   <script defer src="https://static.cloudflareinsights.com/beacon.min.js"
