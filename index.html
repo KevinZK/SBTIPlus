@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SBTI+ 人格测试</title>
   <meta name="description" content="SBTI+ 人格测试 —— 31 题 · 15 维度 · 22 种人格，五级稀有度，娱乐向。" />
-  <link rel="stylesheet" href="./style.css?v=3" />
+  <link rel="stylesheet" href="./style.css?v=4" />
 
   <!-- Google AdSense -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3157688021282766"
@@ -72,6 +72,9 @@
         <blockquote id="resTagline" class="tagline"></blockquote>
         <p id="resDesc" class="res-desc"></p>
 
+        <h3>社交兼容性</h3>
+        <ul id="tagList" class="tag-list"></ul>
+
         <!-- Ad slot: 描述之后 / 维度之前 · 黄金位置（审核通过后取消注释） -->
         <!--
         <div class="ad-slot">
@@ -108,9 +111,22 @@
         </div>
 
         <footer class="result-foot">
+          <button class="btn btn-share" id="shareBtn">📤 分享结果</button>
           <button class="btn btn-secondary" id="restartBtn">重新测试</button>
           <button class="btn btn-primary" id="homeBtn">回到首页</button>
         </footer>
+
+        <!-- 分享图预览浮层 -->
+        <div id="shareOverlay" class="share-overlay" style="display:none">
+          <div class="share-modal">
+            <canvas id="shareCanvas"></canvas>
+            <div class="share-actions">
+              <button class="btn btn-primary" id="shareSaveBtn">保存图片</button>
+              <button class="btn btn-secondary" id="shareCloseBtn">关闭</button>
+            </div>
+            <p class="share-hint">长按图片或点击"保存图片"即可分享到社交平台</p>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -129,9 +145,9 @@
     <p>© 2026 SBTI+ · 纯娱乐 · 本测试不做任何诊断</p>
   </footer>
 
-  <script src="./data.js?v=3"></script>
-  <script src="./avatars.js?v=3"></script>
-  <script src="./app.js?v=3"></script>
+  <script src="./data.js?v=4"></script>
+  <script src="./avatars.js?v=4"></script>
+  <script src="./app.js?v=4"></script>
 
   <!-- Cloudflare Web Analytics —— 把下面的 YOUR_TOKEN_HERE 替换成你在 CF 后台拿到的 token -->
   <script defer src="https://static.cloudflareinsights.com/beacon.min.js"

@@ -24,35 +24,23 @@
     legend:   { label: '传说',   stars: '★★★★★', short: 'LEGENDARY', color: '#ffd34d' },
   };
 
-  // 根据人格 key + 稀有度生成一张 SVG 头像
+  // 根据人格 key + 稀有度生成一张头像
   function makeAvatar(typeKey, rarityKey, size = 180) {
     const rar = RARITY[rarityKey] || RARITY.common;
     const emoji = (window.SBTI_AVATARS && window.SBTI_AVATARS[typeKey]) || '❓';
     const c = rar.color;
-    const id = 'g-' + typeKey + '-' + size;
-    const fontSize = Math.round(size * 0.52);
-    const cy = Math.round(size / 2);
+    // 塔罗牌长宽比定为 2:3
+    const height = Math.round(size * 1.5);
     return `
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">
-        <defs>
-          <radialGradient id="${id}" cx="50%" cy="42%" r="58%">
-            <stop offset="0%"  stop-color="${c}" stop-opacity="0.55"/>
-            <stop offset="70%" stop-color="${c}" stop-opacity="0.12"/>
-            <stop offset="100%" stop-color="${c}" stop-opacity="0"/>
-          </radialGradient>
-          <radialGradient id="${id}-ring" cx="50%" cy="50%" r="50%">
-            <stop offset="92%" stop-color="${c}" stop-opacity="0"/>
-            <stop offset="100%" stop-color="${c}" stop-opacity="0.9"/>
-          </radialGradient>
-        </defs>
-        <circle cx="${size/2}" cy="${size/2}" r="${size/2 - 2}" fill="#1e222b"/>
-        <circle cx="${size/2}" cy="${size/2}" r="${size/2 - 2}" fill="url(#${id})"/>
-        <circle cx="${size/2}" cy="${size/2}" r="${size/2 - 2}" fill="none"
-                stroke="${c}" stroke-width="2" stroke-opacity="0.7"/>
-        <text x="${size/2}" y="${cy}" font-size="${fontSize}"
-              text-anchor="middle" dominant-baseline="central"
-              style="font-family:-apple-system,'Segoe UI Emoji','Noto Color Emoji',sans-serif">${emoji}</text>
-      </svg>`;
+      <div class="tarot-card card-rarity-${rarityKey}" style="width: ${size}px; height: ${height}px; --rarity: ${c}">
+        <div class="tarot-card-inner">
+          <img src="./assets/avatars/${typeKey}.webp" alt="${typeKey}" 
+               onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+          <div class="tarot-fallback" style="display: none;">
+             <span class="emoji" style="font-size: ${Math.round(size * 0.45)}px">${emoji}</span>
+          </div>
+        </div>
+      </div>`;
   }
 
   // state
@@ -190,6 +178,10 @@
     const ranked = matchTypes(dims);
     const top = ranked[0];
 
+    // 缓存供分享使用
+    lastTop = top;
+    lastDims = dims;
+
     // 人格头像
     $('resAvatar').innerHTML = makeAvatar(top.type.k, top.type.rarity, 180);
 
@@ -229,6 +221,36 @@
       descEl.appendChild(toneEl);
     }
 
+    // 社交兼容性标签
+    const TAG_TIER = {
+      S: { label: '极品', color: '#7ed0a0' },
+      A: { label: '靠谱', color: '#7ad0ff' },
+      B: { label: '看缘', color: '#ffd34d' },
+      C: { label: '慎选', color: '#ff6b6b' },
+    };
+    const TAG_CAT = {
+      love:   { icon: '💘', name: '恋爱搭子' },
+      friend: { icon: '🤝', name: '友情搭子' },
+      work:   { icon: '💼', name: '搭班搭子' },
+      vibe:   { icon: '✨', name: '氛围感' },
+    };
+    $('tagList').innerHTML = (top.type.tags || []).map((t) => {
+      const tier = TAG_TIER[t.tier] || TAG_TIER.B;
+      const cat = TAG_CAT[t.cat] || { icon: '🏷️', name: t.cat };
+      return `
+        <li class="tag-item" style="border-left-color:${tier.color}">
+          <div class="tag-item-head">
+            <span class="tag-cat">
+              <span class="tag-cat-icon">${cat.icon}</span>${cat.name}
+            </span>
+            <span class="tag-tier" style="color:${tier.color};background:${tier.color}18">
+              ${tier.label}
+            </span>
+          </div>
+          <p class="tag-desc">${escapeHtml(t.desc)}</p>
+        </li>`;
+    }).join('');
+
     // 维度卡片 —— 像原作那种
     $('dimList').innerHTML = DIMS.map((d) => {
       const v = dims[d.code];
@@ -266,6 +288,330 @@
     }).join('');
   }
 
+  // ---------- Share ----------
+  let lastTop = null;  // 缓存结果供分享使用
+  let lastDims = null;
+
+  function generateShareImage() {
+    const top = lastTop;
+    const dims = lastDims;
+    if (!top) return;
+
+    const W = 720, H = 1280;
+    const canvas = $('shareCanvas');
+    canvas.width = W;
+    canvas.height = H;
+    const ctx = canvas.getContext('2d');
+
+    const rar = RARITY[top.type.rarity] || RARITY.common;
+    const rarColor = rar.color;
+
+    // 背景
+    ctx.fillStyle = '#0f1115';
+    ctx.fillRect(0, 0, W, H);
+
+    // 顶部装饰线
+    const grad = ctx.createLinearGradient(0, 0, W, 0);
+    grad.addColorStop(0, 'transparent');
+    grad.addColorStop(0.3, rarColor);
+    grad.addColorStop(0.7, rarColor);
+    grad.addColorStop(1, 'transparent');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, W, 3);
+
+    // 品牌
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#8a90a0';
+    ctx.font = '600 16px -apple-system, "PingFang SC", sans-serif';
+    ctx.fillText('SBTI+ 人格测试', W / 2, 48);
+
+    // "你的主人格"
+    ctx.fillStyle = '#8a90a0';
+    ctx.font = '14px -apple-system, "PingFang SC", sans-serif';
+    ctx.fillText('你的主人格', W / 2, 80);
+
+    // 头像区域 —— 加载 webp 图片绘制
+    const avatarSize = 200;
+    const avatarH = 300;
+    const avatarX = (W - avatarSize) / 2;
+    const avatarY = 100;
+
+    // 头像外框光晕
+    ctx.save();
+    ctx.shadowColor = rarColor;
+    ctx.shadowBlur = 24;
+    ctx.fillStyle = '#171a21';
+    roundRect(ctx, avatarX - 6, avatarY - 6, avatarSize + 12, avatarH + 12, 14);
+    ctx.fill();
+    ctx.restore();
+
+    // 头像内框背景
+    ctx.fillStyle = '#0f1115';
+    roundRect(ctx, avatarX, avatarY, avatarSize, avatarH, 10);
+    ctx.fill();
+
+    // 加载头像图片并绘制
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      ctx.save();
+      roundRect(ctx, avatarX, avatarY, avatarSize, avatarH, 10);
+      ctx.clip();
+      ctx.drawImage(img, avatarX, avatarY, avatarSize, avatarH);
+      ctx.restore();
+      drawTextContent();
+    };
+    img.onerror = () => {
+      // fallback: 画 emoji
+      const emoji = (window.SBTI_AVATARS && window.SBTI_AVATARS[top.type.k]) || '?';
+      ctx.font = '80px serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(emoji, W / 2, avatarY + avatarH / 2 + 28);
+      drawTextContent();
+    };
+    img.src = `./assets/avatars/${top.type.k}.webp`;
+
+    function drawTextContent() {
+      let y = avatarY + avatarH + 40;
+
+      // 人格名称
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#e7e9ee';
+      ctx.font = 'bold 48px -apple-system, "PingFang SC", sans-serif';
+      ctx.fillText(top.type.name, W / 2, y);
+      y += 32;
+
+      // Code
+      ctx.fillStyle = '#7ad0ff';
+      ctx.font = '600 18px -apple-system, "PingFang SC", sans-serif';
+      ctx.fillText(top.type.sub, W / 2, y);
+      y += 36;
+
+      // 稀有度徽章
+      const badgeText = `${rar.stars}  ${rar.short} · ${rar.label}`;
+      ctx.font = 'bold 14px -apple-system, "PingFang SC", sans-serif';
+      const badgeW = ctx.measureText(badgeText).width + 32;
+      const badgeX = (W - badgeW) / 2;
+      ctx.strokeStyle = rarColor;
+      ctx.lineWidth = 1.5;
+      ctx.fillStyle = 'rgba(255,255,255,0.03)';
+      roundRect(ctx, badgeX, y - 16, badgeW, 28, 14);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = rarColor;
+      ctx.fillText(badgeText, W / 2, y + 4);
+      y += 32;
+
+      // 匹配度
+      ctx.fillStyle = '#ffd34d';
+      ctx.font = 'bold 20px -apple-system, "PingFang SC", sans-serif';
+      ctx.fillText(`匹配度 ${top.match}%`, W / 2, y);
+      y += 36;
+
+      // Tagline
+      ctx.fillStyle = '#e7e9ee';
+      ctx.font = 'italic 18px -apple-system, "PingFang SC", sans-serif';
+      const tagline = `"${top.type.tagline}"`;
+      const taglineLines = wrapText(ctx, tagline, W - 120);
+      taglineLines.forEach((line) => {
+        ctx.fillText(line, W / 2, y);
+        y += 26;
+      });
+      y += 16;
+
+      // 分隔线
+      ctx.strokeStyle = '#262b36';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(60, y);
+      ctx.lineTo(W - 60, y);
+      ctx.stroke();
+      y += 28;
+
+      // 社交兼容性标签
+      const TAG_TIER = {
+        S: { label: '极品', color: '#7ed0a0' },
+        A: { label: '靠谱', color: '#7ad0ff' },
+        B: { label: '看缘', color: '#ffd34d' },
+        C: { label: '慎选', color: '#ff6b6b' },
+      };
+      const TAG_CAT = {
+        love: { icon: '\u{1F498}', name: '恋爱搭子' },
+        friend: { icon: '\u{1F91D}', name: '友情搭子' },
+        work: { icon: '\u{1F4BC}', name: '搭班搭子' },
+        vibe: { icon: '\u2728', name: '氛围感' },
+      };
+
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#8a90a0';
+      ctx.font = '600 14px -apple-system, "PingFang SC", sans-serif';
+      ctx.fillText('社交兼容性', 60, y);
+      y += 20;
+
+      const tags = top.type.tags || [];
+      const tagColW = (W - 120 - 16) / 2;
+
+      tags.forEach((t, i) => {
+        const tier = TAG_TIER[t.tier] || TAG_TIER.B;
+        const cat = TAG_CAT[t.cat] || { icon: '', name: t.cat };
+        const col = i % 2;
+        const tx = 60 + col * (tagColW + 16);
+        const ty = y + Math.floor(i / 2) * 56;
+
+        // Tag card background
+        ctx.fillStyle = '#1e222b';
+        roundRect(ctx, tx, ty, tagColW, 46, 8);
+        ctx.fill();
+
+        // Left border color
+        ctx.fillStyle = tier.color;
+        roundRect(ctx, tx, ty, 3, 46, 2);
+        ctx.fill();
+
+        // Cat name
+        ctx.fillStyle = '#e7e9ee';
+        ctx.font = '600 13px -apple-system, "PingFang SC", sans-serif';
+        ctx.fillText(`${cat.name}`, tx + 14, ty + 20);
+
+        // Tier label
+        ctx.fillStyle = tier.color;
+        ctx.font = 'bold 12px -apple-system, "PingFang SC", sans-serif';
+        const tierText = tier.label;
+        const tierW = ctx.measureText(tierText).width + 14;
+        ctx.fillText(tierText, tx + tagColW - tierW, ty + 20);
+
+        // Desc (truncated)
+        ctx.fillStyle = '#8a90a0';
+        ctx.font = '12px -apple-system, "PingFang SC", sans-serif';
+        const desc = t.desc.length > 16 ? t.desc.slice(0, 15) + '…' : t.desc;
+        ctx.fillText(desc, tx + 14, ty + 38);
+      });
+
+      y += Math.ceil(tags.length / 2) * 56 + 24;
+
+      // 分隔线
+      ctx.strokeStyle = '#262b36';
+      ctx.beginPath();
+      ctx.moveTo(60, y);
+      ctx.lineTo(W - 60, y);
+      ctx.stroke();
+      y += 24;
+
+      // 维度概览（精简版：只显示维度名 + 等级）
+      ctx.fillStyle = '#8a90a0';
+      ctx.font = '600 14px -apple-system, "PingFang SC", sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText('十五维度概览', 60, y);
+      y += 20;
+
+      const dimCols = 3;
+      const dimColW = (W - 120 - (dimCols - 1) * 12) / dimCols;
+
+      DIMS.forEach((d, i) => {
+        const v = dims[d.code];
+        const lv = levelOf(v);
+        const col = i % dimCols;
+        const row = Math.floor(i / dimCols);
+        const dx = 60 + col * (dimColW + 12);
+        const dy = y + row * 38;
+
+        // Background
+        ctx.fillStyle = '#1e222b';
+        roundRect(ctx, dx, dy, dimColW, 30, 6);
+        ctx.fill();
+
+        // Dim name
+        ctx.textAlign = 'left';
+        ctx.fillStyle = '#e7e9ee';
+        ctx.font = '12px -apple-system, "PingFang SC", sans-serif';
+        ctx.fillText(d.name, dx + 10, dy + 20);
+
+        // Level
+        const lvColors = { H: '#ffd34d', M: '#7ad0ff', L: '#b0a5ff' };
+        ctx.textAlign = 'right';
+        ctx.fillStyle = lvColors[lv] || '#8a90a0';
+        ctx.font = 'bold 13px -apple-system, "PingFang SC", sans-serif';
+        ctx.fillText(lv, dx + dimColW - 10, dy + 20);
+      });
+
+      y += Math.ceil(DIMS.length / dimCols) * 38 + 24;
+
+      // 底部 CTA
+      const ctaGrad = ctx.createLinearGradient(0, H - 60, W, H - 60);
+      ctaGrad.addColorStop(0, 'transparent');
+      ctaGrad.addColorStop(0.3, '#262b36');
+      ctaGrad.addColorStop(0.7, '#262b36');
+      ctaGrad.addColorStop(1, 'transparent');
+      ctx.fillStyle = ctaGrad;
+      ctx.fillRect(0, H - 65, W, 1);
+
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#8a90a0';
+      ctx.font = '14px -apple-system, "PingFang SC", sans-serif';
+      ctx.fillText('搜索「SBTI+ 人格测试」测测你是哪种稀有人格', W / 2, H - 30);
+
+      // 底部装饰线
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, H - 3, W, 3);
+
+      // 显示浮层
+      $('shareOverlay').style.display = 'flex';
+    }
+  }
+
+  function roundRect(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.arcTo(x + w, y, x + w, y + r, r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
+    ctx.lineTo(x + r, y + h);
+    ctx.arcTo(x, y + h, x, y + h - r, r);
+    ctx.lineTo(x, y + r);
+    ctx.arcTo(x, y, x + r, y, r);
+    ctx.closePath();
+  }
+
+  function wrapText(ctx, text, maxW) {
+    const lines = [];
+    let line = '';
+    for (const ch of text) {
+      const test = line + ch;
+      if (ctx.measureText(test).width > maxW && line) {
+        lines.push(line);
+        line = ch;
+      } else {
+        line = test;
+      }
+    }
+    if (line) lines.push(line);
+    return lines;
+  }
+
+  function saveShareImage() {
+    const canvas = $('shareCanvas');
+    canvas.toBlob((blob) => {
+      if (!blob) return;
+      // 尝试 Web Share API
+      if (navigator.share && navigator.canShare) {
+        const file = new File([blob], 'sbti-result.png', { type: 'image/png' });
+        const shareData = { files: [file] };
+        if (navigator.canShare(shareData)) {
+          navigator.share(shareData).catch(() => {});
+          return;
+        }
+      }
+      // fallback: 下载
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'sbti-result.png';
+      a.click();
+      URL.revokeObjectURL(url);
+    }, 'image/png');
+  }
+
   // ---------- Wiring ----------
   function resetAnswers() {
     answers = new Array(QUESTIONS.length).fill(null);
@@ -297,6 +643,12 @@
   });
   $('restartBtn').addEventListener('click', () => { resetAnswers(); show('quiz'); });
   $('homeBtn').addEventListener('click', () => { resetAnswers(); show('intro'); });
+  $('shareBtn').addEventListener('click', generateShareImage);
+  $('shareSaveBtn').addEventListener('click', saveShareImage);
+  $('shareCloseBtn').addEventListener('click', () => { $('shareOverlay').style.display = 'none'; });
+  $('shareOverlay').addEventListener('click', (e) => {
+    if (e.target === $('shareOverlay')) $('shareOverlay').style.display = 'none';
+  });
 
   // 键盘快捷键：1/2/3 或 A/B/C 选项，← 返回上一题
   document.addEventListener('keydown', (e) => {

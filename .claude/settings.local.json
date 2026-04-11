@@ -7,7 +7,24 @@
       "Bash(node:*)",
       "Read(//private/tmp/**)",
       "Bash(npm init:*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(curl -s \"https://generativelanguage.googleapis.com/v1beta/models?key=AIzaSyCdgjPJ5dbBgvvOBuVfTQei03nmn6cDJfg\")",
+      "Bash(curl -s \"https://generativelanguage.googleapis.com/v1beta/models?key=AIzaSyCdgjPJ5dbBgvvOBuVfTQei03nmn6cDJfg&pageSize=100\")",
+      "Bash(curl -s -L https://ai.google.dev/gemini-api/docs/image-generation)",
+      "Bash(curl -s -L https://ai.google.dev/api/images)",
+      "WebSearch",
+      "WebFetch(domain:ai.google.dev)",
+      "WebFetch(domain:gemini-api.apidog.io)",
+      "WebFetch(domain:github.com)",
+      "Bash(pip3 install:*)",
+      "Bash(ls -lh /Users/kevin/Desktop/WorkSpace/SBTIPlus/assets/avatars/*.png)",
+      "Bash(brew list:*)",
+      "Bash(brew install:*)",
+      "Bash(for f:*)",
+      "Bash(do cwebp:*)",
+      "Bash(done)",
+      "Bash(du -sh /Users/kevin/Desktop/WorkSpace/SBTIPlus/assets/avatars/*.webp)",
+      "Bash(ls -lh /Users/kevin/Desktop/WorkSpace/SBTIPlus/assets/avatars/*.webp)"
     ]
   }
 }
