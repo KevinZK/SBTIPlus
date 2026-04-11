@@ -297,7 +297,7 @@
     const dims = lastDims;
     if (!top) return;
 
-    const W = 720, H = 1280;
+    const W = 720, H = 1400;
     const canvas = $('shareCanvas');
     canvas.width = W;
     canvas.height = H;
@@ -536,26 +536,55 @@
 
       y += Math.ceil(DIMS.length / dimCols) * 38 + 24;
 
-      // 底部 CTA
-      const ctaGrad = ctx.createLinearGradient(0, H - 60, W, H - 60);
+      // 底部区域：二维码 + 网址
+      const ctaGrad = ctx.createLinearGradient(0, H - 150, W, H - 150);
       ctaGrad.addColorStop(0, 'transparent');
       ctaGrad.addColorStop(0.3, '#262b36');
       ctaGrad.addColorStop(0.7, '#262b36');
       ctaGrad.addColorStop(1, 'transparent');
       ctx.fillStyle = ctaGrad;
-      ctx.fillRect(0, H - 65, W, 1);
+      ctx.fillRect(0, H - 150, W, 1);
 
-      ctx.textAlign = 'center';
-      ctx.fillStyle = '#8a90a0';
-      ctx.font = '14px -apple-system, "PingFang SC", sans-serif';
-      ctx.fillText('搜索「SBTI+ 人格测试」测测你是哪种稀有人格', W / 2, H - 30);
+      // 二维码
+      const qrSize = 90;
+      const qrX = 60;
+      const qrY = H - 130;
+      const qrImg = new Image();
+      qrImg.crossOrigin = 'anonymous';
+      qrImg.onload = () => {
+        // 二维码白底圆角
+        ctx.fillStyle = '#fff';
+        roundRect(ctx, qrX - 4, qrY - 4, qrSize + 8, qrSize + 8, 8);
+        ctx.fill();
+        ctx.drawImage(qrImg, qrX, qrY, qrSize, qrSize);
+        finishShare();
+      };
+      qrImg.onerror = () => finishShare();
+      qrImg.src = './assets/qrcode.webp';
 
-      // 底部装饰线
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, H - 3, W, 3);
+      function finishShare() {
+        // 右侧文字
+        const textX = qrX + qrSize + 24;
+        ctx.textAlign = 'left';
+        ctx.fillStyle = '#e7e9ee';
+        ctx.font = 'bold 18px -apple-system, "PingFang SC", sans-serif';
+        ctx.fillText('扫码测测你是哪种稀有人格', textX, qrY + 28);
 
-      // 显示浮层
-      $('shareOverlay').style.display = 'flex';
+        ctx.fillStyle = rarColor;
+        ctx.font = '600 16px -apple-system, "PingFang SC", sans-serif';
+        ctx.fillText('sbti.finboo.cn', textX, qrY + 54);
+
+        ctx.fillStyle = '#8a90a0';
+        ctx.font = '12px -apple-system, "PingFang SC", sans-serif';
+        ctx.fillText('SBTI+ 人格测试 · 纯娱乐', textX, qrY + 78);
+
+        // 底部装饰线
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, H - 3, W, 3);
+
+        // 显示浮层
+        $('shareOverlay').style.display = 'flex';
+      }
     }
   }
 

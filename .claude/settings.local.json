@@ -24,7 +24,10 @@
       "Bash(do cwebp:*)",
       "Bash(done)",
       "Bash(du -sh /Users/kevin/Desktop/WorkSpace/SBTIPlus/assets/avatars/*.webp)",
-      "Bash(ls -lh /Users/kevin/Desktop/WorkSpace/SBTIPlus/assets/avatars/*.webp)"
+      "Bash(ls -lh /Users/kevin/Desktop/WorkSpace/SBTIPlus/assets/avatars/*.webp)",
+      "Bash(rm *.png)",
+      "Bash(ls *.webp)",
+      "Bash(cwebp -q 90 /Users/kevin/Desktop/WorkSpace/SBTIPlus/assets/L2uovM.png -o /Users/kevin/Desktop/WorkSpace/SBTIPlus/assets/qrcode.webp)"
     ]
   }
 }
