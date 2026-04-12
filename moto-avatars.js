@@ -15,7 +15,7 @@ window.MOTO_AVATARS = {
   TULU:     '🧑‍🦲',  // 秃驴 — 光头
   ZHUANGBI: '📸',   // 装逼王 — 相机
   CHUANXIN: '📯',   // 传信兵 — 号角
-  LUOSIDAO: '🔧',   // 螺丝刀 — 扳手
+  BANSHOU:  '🔧',   // 扳手 — 扳手
   CAIGOU:   '🐶',   // 菜狗 — 小狗
   YELV:     '🫏',   // 野驴 — 驴
   SHIREN:   '📝',   // 公路诗人 — 纸笔
