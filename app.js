@@ -297,7 +297,17 @@
     const dims = lastDims;
     if (!top) return;
 
-    const W = 720, H = 1400;
+    const W = 720;
+    // 先用临时canvas预算描述文字高度
+    const tmpCanvas = document.createElement('canvas');
+    tmpCanvas.width = W;
+    const tmpCtx = tmpCanvas.getContext('2d');
+    tmpCtx.font = '14px -apple-system, "PingFang SC", sans-serif';
+    const preDescLines = wrapText(tmpCtx, top.type.desc, W - 160);
+    const descBlockH = preDescLines.length * 22 + 24;
+    // 头像400 + 名称区200 + 标签160 + 描述区descBlockH + 底部200 + 余量
+    const H = 400 + 200 + 160 + descBlockH + 200 + 80;
+
     const canvas = $('shareCanvas');
     canvas.width = W;
     canvas.height = H;
@@ -497,44 +507,39 @@
       ctx.stroke();
       y += 24;
 
-      // 维度概览（精简版：只显示维度名 + 等级）
+      // 人格描述
+      ctx.textAlign = 'left';
       ctx.fillStyle = '#8a90a0';
       ctx.font = '600 14px -apple-system, "PingFang SC", sans-serif';
-      ctx.textAlign = 'left';
-      ctx.fillText('十五维度概览', 60, y);
+      ctx.fillText('人格解读', 60, y);
       y += 20;
 
-      const dimCols = 3;
-      const dimColW = (W - 120 - (dimCols - 1) * 12) / dimCols;
+      // 描述背景卡片
+      ctx.fillStyle = '#1e222b';
+      const descText = top.type.desc;
+      ctx.font = '14px -apple-system, "PingFang SC", sans-serif';
+      const descLines = wrapText(ctx, descText, W - 160);
+      const descCardH = descLines.length * 22 + 24;
+      roundRect(ctx, 60, y, W - 120, descCardH, 10);
+      ctx.fill();
 
-      DIMS.forEach((d, i) => {
-        const v = dims[d.code];
-        const lv = levelOf(v);
-        const col = i % dimCols;
-        const row = Math.floor(i / dimCols);
-        const dx = 60 + col * (dimColW + 12);
-        const dy = y + row * 38;
-
-        // Background
-        ctx.fillStyle = '#1e222b';
-        roundRect(ctx, dx, dy, dimColW, 30, 6);
-        ctx.fill();
-
-        // Dim name
-        ctx.textAlign = 'left';
-        ctx.fillStyle = '#e7e9ee';
-        ctx.font = '12px -apple-system, "PingFang SC", sans-serif';
-        ctx.fillText(d.name, dx + 10, dy + 20);
-
-        // Level
-        const lvColors = { H: '#ffd34d', M: '#7ad0ff', L: '#b0a5ff' };
-        ctx.textAlign = 'right';
-        ctx.fillStyle = lvColors[lv] || '#8a90a0';
-        ctx.font = 'bold 13px -apple-system, "PingFang SC", sans-serif';
-        ctx.fillText(lv, dx + dimColW - 10, dy + 20);
+      // 描述文字
+      ctx.fillStyle = '#c8cad0';
+      let descY = y + 20;
+      descLines.forEach((line) => {
+        // 【】标签用稀有度颜色
+        if (line.includes('【')) {
+          ctx.fillStyle = rarColor;
+          ctx.font = 'bold 14px -apple-system, "PingFang SC", sans-serif';
+        } else {
+          ctx.fillStyle = '#c8cad0';
+          ctx.font = '14px -apple-system, "PingFang SC", sans-serif';
+        }
+        ctx.fillText(line, 80, descY);
+        descY += 22;
       });
 
-      y += Math.ceil(DIMS.length / dimCols) * 38 + 24;
+      y += descCardH + 20;
 
       // 底部区域：二维码 + 网址
       const ctaGrad = ctx.createLinearGradient(0, H - 150, W, H - 150);
