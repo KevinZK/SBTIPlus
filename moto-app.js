@@ -1,5 +1,5 @@
 (() => {
-  const { DIMS, QUESTIONS, TYPES } = window.SBTI;
+  const { DIMS, QUESTIONS, TYPES } = window.MOTO;
 
   const $ = (id) => document.getElementById(id);
   const screens = {
@@ -19,22 +19,22 @@
   const RARITY = {
     common:   { label: '常见',   stars: '★',     short: 'COMMON',    color: '#9aa0ac' },
     uncommon: { label: '普通',   stars: '★★',    short: 'UNCOMMON',  color: '#7ed0a0' },
-    rare:     { label: '稀有',   stars: '★★★',   short: 'RARE',      color: '#7ad0ff' },
+    rare:     { label: '稀有',   stars: '★★★',   short: 'RARE',      color: '#00d4ff' },
     epic:     { label: '史诗',   stars: '★★★★',  short: 'EPIC',      color: '#c58cff' },
-    legend:   { label: '传说',   stars: '★★★★★', short: 'LEGENDARY', color: '#ffd34d' },
+    legend:   { label: '传说',   stars: '★★★★★', short: 'LEGENDARY', color: '#ff6b35' },
   };
 
   // 根据人格 key + 稀有度生成一张头像
   function makeAvatar(typeKey, rarityKey, size = 180) {
     const rar = RARITY[rarityKey] || RARITY.common;
-    const emoji = (window.SBTI_AVATARS && window.SBTI_AVATARS[typeKey]) || '❓';
+    const emoji = (window.MOTO_AVATARS && window.MOTO_AVATARS[typeKey]) || '❓';
     const c = rar.color;
     // 塔罗牌长宽比定为 2:3
     const height = Math.round(size * 1.5);
     return `
       <div class="tarot-card card-rarity-${rarityKey}" style="width: ${size}px; height: ${height}px; --rarity: ${c}">
         <div class="tarot-card-inner">
-          <img src="./assets/avatars/${typeKey}.webp" alt="${typeKey}" 
+          <img src="./assets/moto-avatars/${typeKey}.webp" alt="${typeKey}"
                onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
           <div class="tarot-fallback" style="display: none;">
              <span class="emoji" style="font-size: ${Math.round(size * 0.45)}px">${emoji}</span>
@@ -109,7 +109,7 @@
     } else {
       // 最后一题：显示提交按钮
       $('submitBtn').style.display = '';
-      $('hint').textContent = '已经是最后一题，可以查看你的人格了 →';
+      $('hint').textContent = '已经是最后一题，可以查看你的骑士人格了 →';
     }
   }
 
@@ -217,22 +217,22 @@
     if (top.type.tone) {
       const toneEl = document.createElement('p');
       toneEl.className = 'desc-tone';
-      toneEl.textContent = `—— 人格基调：${top.type.tone}`;
+      toneEl.textContent = `—— 骑士基调：${top.type.tone}`;
       descEl.appendChild(toneEl);
     }
 
-    // 社交兼容性标签
+    // 骑行兼容性标签
     const TAG_TIER = {
       S: { label: '极品', color: '#7ed0a0' },
-      A: { label: '靠谱', color: '#7ad0ff' },
-      B: { label: '看缘', color: '#ffd34d' },
+      A: { label: '靠谱', color: '#00d4ff' },
+      B: { label: '看缘', color: '#ff6b35' },
       C: { label: '慎选', color: '#ff6b6b' },
     };
     const TAG_CAT = {
-      love:   { icon: '💘', name: '恋爱搭子' },
-      friend: { icon: '🤝', name: '友情搭子' },
-      work:   { icon: '💼', name: '搭班搭子' },
-      vibe:   { icon: '✨', name: '氛围感' },
+      ride:   { icon: '🏍️', name: '骑行搭子' },
+      crew:   { icon: '🤝', name: '车队队友' },
+      wrench: { icon: '🔧', name: '修车搭子' },
+      soul:   { icon: '🔥', name: '灵魂共鸣' },
     };
     $('tagList').innerHTML = (top.type.tags || []).map((t) => {
       const tier = TAG_TIER[t.tier] || TAG_TIER.B;
@@ -307,7 +307,7 @@
     const rarColor = rar.color;
 
     // 背景
-    ctx.fillStyle = '#0f1115';
+    ctx.fillStyle = '#0a0c0f';
     ctx.fillRect(0, 0, W, H);
 
     // 顶部装饰线
@@ -323,12 +323,12 @@
     ctx.textAlign = 'center';
     ctx.fillStyle = '#8a90a0';
     ctx.font = '600 16px -apple-system, "PingFang SC", sans-serif';
-    ctx.fillText('S-BTI 人格测试', W / 2, 48);
+    ctx.fillText('MOTO-BTI 骑士人格测试', W / 2, 48);
 
-    // "你的主人格"
+    // "你的骑士人格"
     ctx.fillStyle = '#8a90a0';
     ctx.font = '14px -apple-system, "PingFang SC", sans-serif';
-    ctx.fillText('你的主人格', W / 2, 80);
+    ctx.fillText('你的骑士人格', W / 2, 80);
 
     // 头像区域 —— 加载 webp 图片绘制
     const avatarSize = 200;
@@ -346,7 +346,7 @@
     ctx.restore();
 
     // 头像内框背景
-    ctx.fillStyle = '#0f1115';
+    ctx.fillStyle = '#0a0c0f';
     roundRect(ctx, avatarX, avatarY, avatarSize, avatarH, 10);
     ctx.fill();
 
@@ -363,13 +363,13 @@
     };
     img.onerror = () => {
       // fallback: 画 emoji
-      const emoji = (window.SBTI_AVATARS && window.SBTI_AVATARS[top.type.k]) || '?';
+      const emoji = (window.MOTO_AVATARS && window.MOTO_AVATARS[top.type.k]) || '?';
       ctx.font = '80px serif';
       ctx.textAlign = 'center';
       ctx.fillText(emoji, W / 2, avatarY + avatarH / 2 + 28);
       drawTextContent();
     };
-    img.src = `./assets/avatars/${top.type.k}.webp`;
+    img.src = `./assets/moto-avatars/${top.type.k}.webp`;
 
     function drawTextContent() {
       let y = avatarY + avatarH + 40;
@@ -382,7 +382,7 @@
       y += 32;
 
       // Code
-      ctx.fillStyle = '#7ad0ff';
+      ctx.fillStyle = '#00d4ff';
       ctx.font = '600 18px -apple-system, "PingFang SC", sans-serif';
       ctx.fillText(top.type.sub, W / 2, y);
       y += 36;
@@ -403,7 +403,7 @@
       y += 32;
 
       // 匹配度
-      ctx.fillStyle = '#ffd34d';
+      ctx.fillStyle = '#ff6b35';
       ctx.font = 'bold 20px -apple-system, "PingFang SC", sans-serif';
       ctx.fillText(`匹配度 ${top.match}%`, W / 2, y);
       y += 36;
@@ -428,24 +428,24 @@
       ctx.stroke();
       y += 28;
 
-      // 社交兼容性标签
+      // 骑行兼容性标签
       const TAG_TIER = {
         S: { label: '极品', color: '#7ed0a0' },
-        A: { label: '靠谱', color: '#7ad0ff' },
-        B: { label: '看缘', color: '#ffd34d' },
+        A: { label: '靠谱', color: '#00d4ff' },
+        B: { label: '看缘', color: '#ff6b35' },
         C: { label: '慎选', color: '#ff6b6b' },
       };
       const TAG_CAT = {
-        love: { icon: '\u{1F498}', name: '恋爱搭子' },
-        friend: { icon: '\u{1F91D}', name: '友情搭子' },
-        work: { icon: '\u{1F4BC}', name: '搭班搭子' },
-        vibe: { icon: '\u2728', name: '氛围感' },
+        ride:   { icon: '\u{1F3CD}\uFE0F', name: '骑行搭子' },
+        crew:   { icon: '\u{1F91D}', name: '车队队友' },
+        wrench: { icon: '\u{1F527}', name: '修车搭子' },
+        soul:   { icon: '\u{1F525}', name: '灵魂共鸣' },
       };
 
       ctx.textAlign = 'left';
       ctx.fillStyle = '#8a90a0';
       ctx.font = '600 14px -apple-system, "PingFang SC", sans-serif';
-      ctx.fillText('社交兼容性', 60, y);
+      ctx.fillText('骑行兼容性', 60, y);
       y += 20;
 
       const tags = top.type.tags || [];
@@ -527,7 +527,7 @@
         ctx.fillText(d.name, dx + 10, dy + 20);
 
         // Level
-        const lvColors = { H: '#ffd34d', M: '#7ad0ff', L: '#b0a5ff' };
+        const lvColors = { H: '#ff6b35', M: '#00d4ff', L: '#b0a5ff' };
         ctx.textAlign = 'right';
         ctx.fillStyle = lvColors[lv] || '#8a90a0';
         ctx.font = 'bold 13px -apple-system, "PingFang SC", sans-serif';
@@ -568,15 +568,15 @@
         ctx.textAlign = 'left';
         ctx.fillStyle = '#e7e9ee';
         ctx.font = 'bold 18px -apple-system, "PingFang SC", sans-serif';
-        ctx.fillText('扫码测测你是哪种稀有人格', textX, qrY + 28);
+        ctx.fillText('扫码测测你是哪种骑士人格', textX, qrY + 28);
 
         ctx.fillStyle = rarColor;
         ctx.font = '600 16px -apple-system, "PingFang SC", sans-serif';
-        ctx.fillText('sbti.finboo.cn', textX, qrY + 54);
+        ctx.fillText('sbti.finboo.cn/moto.html', textX, qrY + 54);
 
         ctx.fillStyle = '#8a90a0';
         ctx.font = '12px -apple-system, "PingFang SC", sans-serif';
-        ctx.fillText('S-BTI 人格测试 · 纯娱乐', textX, qrY + 78);
+        ctx.fillText('MOTO-BTI 骑士人格测试 · 纯娱乐', textX, qrY + 78);
 
         // 底部装饰线
         ctx.fillStyle = grad;
@@ -624,7 +624,7 @@
       if (!blob) return;
       // 尝试 Web Share API
       if (navigator.share && navigator.canShare) {
-        const file = new File([blob], 'sbti-result.png', { type: 'image/png' });
+        const file = new File([blob], 'moto-bti-result.png', { type: 'image/png' });
         const shareData = { files: [file] };
         if (navigator.canShare(shareData)) {
           navigator.share(shareData).catch(() => {});
@@ -635,7 +635,7 @@
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'sbti-result.png';
+      a.download = 'moto-bti-result.png';
       a.click();
       URL.revokeObjectURL(url);
     }, 'image/png');
@@ -662,7 +662,7 @@
     resetAnswers();
     show('quiz');
   });
-  $('backBtn').addEventListener('click', () => show('intro'));
+  $('backBtn').addEventListener('click', () => { window.location.href = './index.html'; });
   $('prevBtn').addEventListener('click', goPrev);
   $('submitBtn').addEventListener('click', () => {
     if (answers.some((a) => a === null)) return;
@@ -671,7 +671,7 @@
     loadAds();
   });
   $('restartBtn').addEventListener('click', () => { resetAnswers(); show('quiz'); });
-  $('homeBtn').addEventListener('click', () => { resetAnswers(); show('intro'); });
+  $('homeBtn').addEventListener('click', () => { window.location.href = './index.html'; });
   $('shareBtn').addEventListener('click', generateShareImage);
   $('shareSaveBtn').addEventListener('click', saveShareImage);
   $('shareCloseBtn').addEventListener('click', () => { $('shareOverlay').style.display = 'none'; });
@@ -694,4 +694,10 @@
 
   // 初始渲染第一题
   renderCurrentQuestion('forward');
+
+  // 支持 ?start=1 直接跳过首页进入答题
+  if (new URLSearchParams(window.location.search).get('start') === '1') {
+    resetAnswers();
+    show('quiz');
+  }
 })();
